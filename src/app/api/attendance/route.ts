@@ -18,10 +18,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { date, subjectId, status, remarks } = body as {
+    const { date, subjectId, status, lectureCount, remarks } = body as {
       date: string;
       subjectId: string;
       status: AttendanceStatus;
+      lectureCount?: number;
       remarks?: string;
     };
 
@@ -36,6 +37,7 @@ export async function POST(request: NextRequest) {
       date,
       subjectId,
       status,
+      lectureCount: typeof lectureCount === "number" ? lectureCount : Number(lectureCount) || 1,
       remarks: remarks || null,
     });
 

@@ -25,6 +25,7 @@ interface StatsData {
     date: string;
     subjectName: string;
     module: string;
+    lectureCount: number;
     remarks: string | null;
   }[];
   semesterSummary: OverallStats & {
@@ -93,6 +94,7 @@ export async function saveAttendance(payload: {
   date: string;
   subjectId: string;
   status: string;
+  lectureCount?: number;
   remarks?: string;
 }) {
   const res = await fetch("/api/attendance", {

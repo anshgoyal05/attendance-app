@@ -12,6 +12,7 @@ export interface AttendanceRecord {
   date: string;
   subjectId: string;
   status: AttendanceStatus;
+  lectureCount: number;
   remarks: string | null;
   createdAt: string;
   subject?: Subject;
@@ -74,5 +75,6 @@ export interface AttendanceFormDraft {
   date: string;
   subjectId: string;
   status: AttendanceStatus;
+  lectureCount: number;
   remarks: string;
 }

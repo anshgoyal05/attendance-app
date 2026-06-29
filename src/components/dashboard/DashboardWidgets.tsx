@@ -28,6 +28,7 @@ interface DashboardWidgetsProps {
     date: string;
     subjectName: string;
     module: string;
+    lectureCount: number;
     remarks: string | null;
   }[];
   semesterSummary: {
@@ -198,7 +199,14 @@ export function DashboardWidgets({
                 <p className="font-medium truncate max-w-[180px]" title={m.subjectName}>
                   {m.subjectName}
                 </p>
-                <p className="text-xs text-zinc-500">{formatDisplayDate(m.date)}</p>
+                <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+                  <span>{formatDisplayDate(m.date)}</span>
+                  {m.lectureCount > 1 && (
+                    <span className="rounded bg-amber-100 px-1 py-0.2 text-[10px] font-semibold text-amber-800 dark:bg-amber-950/50 dark:text-amber-300">
+                      {m.lectureCount} lectures
+                    </span>
+                  )}
+                </div>
               </div>
               {m.remarks && (
                 <span className="text-xs text-zinc-400 truncate max-w-[80px]" title={m.remarks}>

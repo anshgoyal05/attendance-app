@@ -13,6 +13,7 @@ export function exportToCSV(
     Subject: r.subject?.name || "",
     Module: r.subject?.module || "",
     Status: r.status,
+    Lectures: r.lectureCount ?? 1,
     Remarks: r.remarks || "",
   }));
 
@@ -61,6 +62,7 @@ export function exportToExcel(
     Subject: r.subject?.name || "",
     Module: r.subject?.module || "",
     Status: r.status,
+    Lectures: r.lectureCount ?? 1,
     Remarks: r.remarks || "",
   }));
 
@@ -118,11 +120,12 @@ export function exportToPDF(
 
   autoTable(doc, {
     startY: finalY + 10,
-    head: [["Date", "Subject", "Status", "Remarks"]],
+    head: [["Date", "Subject", "Status", "Lectures", "Remarks"]],
     body: records.slice(0, 50).map((r) => [
       formatDisplayDate(r.date),
       r.subject?.name || "",
       r.status,
+      r.lectureCount ?? 1,
       r.remarks || "",
     ]),
     styles: { fontSize: 8 },

@@ -40,6 +40,7 @@ function toAttendanceRecord(row: {
   date: Date;
   subjectId: string;
   status: AttendanceStatus;
+  lectureCount?: number;
   remarks: string | null;
   createdAt: Date;
   subject?: {
@@ -54,6 +55,7 @@ function toAttendanceRecord(row: {
     date: row.date.toISOString().split("T")[0],
     subjectId: row.subjectId,
     status: row.status,
+    lectureCount: row.lectureCount ?? 1,
     remarks: row.remarks,
     createdAt: row.createdAt.toISOString(),
     subject: row.subject
@@ -101,8 +103,10 @@ export async function upsertAttendance(data: {
   date: string;
   subjectId: string;
   status: AttendanceStatus;
+  lectureCount?: number;
   remarks?: string | null;
 }): Promise<AttendanceRecord> {
+  const count = data.lectureCount && data.lectureCount > 0 ? data.lectureCount : 1;
   const row = await prisma.attendance.upsert({
     where: {
       date_subjectId: {
@@ -112,12 +116,14 @@ export async function upsertAttendance(data: {
     },
     update: {
       status: data.status,
+      lectureCount: count,
       remarks: data.remarks ?? null,
     },
     create: {
       date: new Date(data.date),
       subjectId: data.subjectId,
       status: data.status,
+      lectureCount: count,
       remarks: data.remarks ?? null,
     },
     include: { subject: true },

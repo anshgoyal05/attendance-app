@@ -118,10 +118,15 @@ export function AttendanceCalendar({ records }: AttendanceCalendarProps) {
                       "rounded px-1 py-0.5 text-[10px] leading-tight text-white truncate",
                       STATUS_COLORS[r.status].calendar
                     )}
-                    title={`${r.subject?.name} - ${r.status}`}
+                    title={`${r.subject?.name} - ${r.status}${r.lectureCount > 1 ? ` (${r.lectureCount} lectures)` : ""}`}
                   >
-                    <div className="truncate font-medium">
-                      {getShortSubjectName(r.subject?.name || "")}
+                    <div className="truncate font-medium flex items-center justify-between">
+                      <span className="truncate">{getShortSubjectName(r.subject?.name || "")}</span>
+                      {r.lectureCount > 1 && (
+                        <span className="ml-1 rounded bg-black/20 px-1 text-[9px] font-bold">
+                          {r.lectureCount}x
+                        </span>
+                      )}
                     </div>
                     <div className="opacity-90">
                       {r.status === "PRESENT"

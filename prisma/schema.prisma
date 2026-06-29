@@ -37,8 +37,9 @@ model Attendance {
   date      DateTime         @db.Date
   subjectId String
   subject   Subject          @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  status    AttendanceStatus
-  remarks   String?
+  status       AttendanceStatus
+  lectureCount Int              @default(1)
+  remarks      String?
   createdAt DateTime         @default(now())
 
   @@unique([date, subjectId])

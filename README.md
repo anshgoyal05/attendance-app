@@ -1,4 +1,4 @@
-# Attendance Management System
+1# Attendance Management System
 
 Full-stack attendance tracker built with Next.js 15, Prisma ORM, and PostgreSQL.
 

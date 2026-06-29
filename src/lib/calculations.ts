@@ -23,10 +23,16 @@ export function calculateSubjectStats(
   module: string,
   records: AttendanceRecord[]
 ): SubjectStats {
-  const total = records.length;
-  const present = records.filter((r) => r.status === "PRESENT").length;
-  const absent = records.filter((r) => r.status === "ABSENT").length;
-  const od = records.filter((r) => r.status === "OD").length;
+  const total = records.reduce((sum, r) => sum + (r.lectureCount ?? 1), 0);
+  const present = records
+    .filter((r) => r.status === "PRESENT")
+    .reduce((sum, r) => sum + (r.lectureCount ?? 1), 0);
+  const absent = records
+    .filter((r) => r.status === "ABSENT")
+    .reduce((sum, r) => sum + (r.lectureCount ?? 1), 0);
+  const od = records
+    .filter((r) => r.status === "OD")
+    .reduce((sum, r) => sum + (r.lectureCount ?? 1), 0);
   const attendancePercentage = calculatePercentage(present, od, total);
 
   return {
@@ -43,10 +49,16 @@ export function calculateSubjectStats(
 }
 
 export function calculateOverallStats(records: AttendanceRecord[]): OverallStats {
-  const totalClasses = records.length;
-  const present = records.filter((r) => r.status === "PRESENT").length;
-  const absent = records.filter((r) => r.status === "ABSENT").length;
-  const od = records.filter((r) => r.status === "OD").length;
+  const totalClasses = records.reduce((sum, r) => sum + (r.lectureCount ?? 1), 0);
+  const present = records
+    .filter((r) => r.status === "PRESENT")
+    .reduce((sum, r) => sum + (r.lectureCount ?? 1), 0);
+  const absent = records
+    .filter((r) => r.status === "ABSENT")
+    .reduce((sum, r) => sum + (r.lectureCount ?? 1), 0);
+  const od = records
+    .filter((r) => r.status === "OD")
+    .reduce((sum, r) => sum + (r.lectureCount ?? 1), 0);
   const attendancePercentage = calculatePercentage(present, od, totalClasses);
 
   return {
@@ -135,10 +147,16 @@ export function getMonthlySummaries(records: AttendanceRecord[]): MonthlySummary
       return isWithinInterval(d, { start: monthStart, end: monthEnd });
     });
 
-    const present = monthRecords.filter((r) => r.status === "PRESENT").length;
-    const absent = monthRecords.filter((r) => r.status === "ABSENT").length;
-    const od = monthRecords.filter((r) => r.status === "OD").length;
-    const total = monthRecords.length;
+    const present = monthRecords
+      .filter((r) => r.status === "PRESENT")
+      .reduce((sum, r) => sum + (r.lectureCount ?? 1), 0);
+    const absent = monthRecords
+      .filter((r) => r.status === "ABSENT")
+      .reduce((sum, r) => sum + (r.lectureCount ?? 1), 0);
+    const od = monthRecords
+      .filter((r) => r.status === "OD")
+      .reduce((sum, r) => sum + (r.lectureCount ?? 1), 0);
+    const total = monthRecords.reduce((sum, r) => sum + (r.lectureCount ?? 1), 0);
 
     return {
       month: format(monthStart, "MMM yyyy"),
@@ -170,15 +188,16 @@ export function getWeeklyReports(records: AttendanceRecord[]): WeeklyReport[] {
 
       if (weekRecords.length === 0) return null;
 
-      const attended = weekRecords.filter(
-        (r) => r.status === "PRESENT" || r.status === "OD"
-      ).length;
+      const total = weekRecords.reduce((sum, r) => sum + (r.lectureCount ?? 1), 0);
+      const attended = weekRecords
+        .filter((r) => r.status === "PRESENT" || r.status === "OD")
+        .reduce((sum, r) => sum + (r.lectureCount ?? 1), 0);
 
       return {
         week: `${format(weekStart, "dd MMM")} - ${format(weekEnd, "dd MMM")}`,
-        total: weekRecords.length,
+        total,
         attended,
-        percentage: Math.round((attended / weekRecords.length) * 1000) / 10,
+        percentage: total > 0 ? Math.round((attended / total) * 1000) / 10 : 100,
       };
     })
     .filter((w): w is WeeklyReport => w !== null)
@@ -208,17 +227,19 @@ export function getTrendData(records: AttendanceRecord[]) {
 
   let presentCount = 0;
   let odCount = 0;
+  let runningTotal = 0;
 
-  return sorted.map((record, index) => {
-    if (record.status === "PRESENT") presentCount++;
-    if (record.status === "OD") odCount++;
-    const total = index + 1;
-    const percentage = calculatePercentage(presentCount, odCount, total);
+  return sorted.map((record) => {
+    const count = record.lectureCount ?? 1;
+    if (record.status === "PRESENT") presentCount += count;
+    if (record.status === "OD") odCount += count;
+    runningTotal += count;
+    const percentage = calculatePercentage(presentCount, odCount, runningTotal);
 
     return {
       date: format(new Date(record.date), "dd MMM"),
       percentage,
-      total,
+      total: runningTotal,
     };
   });
 }
@@ -266,6 +287,7 @@ export function getMissedClassHistory(records: AttendanceRecord[]) {
       date: r.date,
       subjectName: r.subject?.name || "Unknown",
       module: r.subject?.module || "",
+      lectureCount: r.lectureCount ?? 1,
       remarks: r.remarks,
     }));
 }

@@ -27,6 +27,7 @@ export function AttendanceForm({
   const [date, setDate] = useState(formatDate(new Date()));
   const [subjectId, setSubjectId] = useState("");
   const [status, setStatus] = useState<AttendanceStatus>("PRESENT");
+  const [lectureCount, setLectureCount] = useState(1);
   const [remarks, setRemarks] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -40,11 +41,13 @@ export function AttendanceForm({
           setDate(parsed.date || formatDate(new Date()));
           setSubjectId(parsed.subjectId || "");
           setStatus(preselectedStatus || parsed.status || "PRESENT");
+          setLectureCount(parsed.lectureCount || 1);
           setRemarks(parsed.remarks || "");
         } catch {
           setDate(formatDate(new Date()));
           setSubjectId("");
           setStatus(preselectedStatus || "PRESENT");
+          setLectureCount(1);
           setRemarks("");
           setError("");
         }
@@ -52,6 +55,7 @@ export function AttendanceForm({
         setDate(formatDate(new Date()));
         setSubjectId(subjects[0]?.id || "");
         setStatus(preselectedStatus || "PRESENT");
+        setLectureCount(1);
         setRemarks("");
         setError("");
       }
@@ -61,14 +65,15 @@ export function AttendanceForm({
 
   useEffect(() => {
     if (!open) return;
-    const draft: AttendanceFormDraft = { date, subjectId, status, remarks };
+    const draft: AttendanceFormDraft = { date, subjectId, status, lectureCount, remarks };
     localStorage.setItem(FORM_DRAFT_KEY, JSON.stringify(draft));
-  }, [date, subjectId, status, remarks, open]);
+  }, [date, subjectId, status, lectureCount, remarks, open]);
 
   const resetForm = () => {
     setDate(formatDate(new Date()));
     setSubjectId(subjects[0]?.id || "");
     setStatus(preselectedStatus || "PRESENT");
+    setLectureCount(1);
     setRemarks("");
     setError("");
   };
@@ -89,7 +94,7 @@ export function AttendanceForm({
     setSaving(true);
     setError("");
     try {
-      await saveAttendance({ date, subjectId, status, remarks });
+      await saveAttendance({ date, subjectId, status, lectureCount, remarks });
       localStorage.removeItem(FORM_DRAFT_KEY);
       onSaved();
       onClose();
@@ -143,6 +148,21 @@ export function AttendanceForm({
             <option value="PRESENT">Present</option>
             <option value="ABSENT">Absent</option>
             <option value="OD">OD</option>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="lectureCount">Class Type / Lecture Count</Label>
+          <Select
+            id="lectureCount"
+            value={lectureCount}
+            onChange={(e) => setLectureCount(Number(e.target.value))}
+            required
+          >
+            <option value={1}>1 Lecture (Regular Class)</option>
+            <option value={2}>2 Lectures (Lab / Double Session)</option>
+            <option value={3}>3 Lectures</option>
+            <option value={4}>4 Lectures</option>
           </Select>
         </div>
 
