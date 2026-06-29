@@ -8,6 +8,7 @@ import { AttendanceCalendar } from "@/components/calendar/AttendanceCalendar";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { ExportPanel } from "@/components/dashboard/ExportPanel";
 import { DashboardWidgets } from "@/components/dashboard/DashboardWidgets";
+import { AttendanceHistoryTable } from "@/components/dashboard/AttendanceHistoryTable";
 import { AttendanceForm } from "@/components/forms/AttendanceForm";
 import { useStats } from "@/hooks/useData";
 import type { AttendanceStatus } from "@/types";
@@ -58,7 +59,9 @@ export default function DashboardPage() {
 
         <SubjectTable subjectStats={data.subjectStats} />
 
-        <AttendanceCalendar records={data.records} />
+        <AttendanceCalendar records={data.records} onDeleted={refetch} />
+
+        <AttendanceHistoryTable records={data.records} onDeleted={refetch} />
 
         <DashboardWidgets
           monthlySummaries={data.monthlySummaries}

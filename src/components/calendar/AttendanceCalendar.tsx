@@ -14,17 +14,34 @@ import {
 } from "date-fns";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import type { AttendanceRecord } from "@/types";
 import { STATUS_COLORS } from "@/lib/constants";
-import { cn, getShortSubjectName } from "@/lib/utils";
+import { cn, getShortSubjectName, formatDisplayDate } from "@/lib/utils";
+import { deleteAttendance } from "@/hooks/useData";
 
 interface AttendanceCalendarProps {
   records: AttendanceRecord[];
+  onDeleted?: () => void;
 }
 
-export function AttendanceCalendar({ records }: AttendanceCalendarProps) {
+export function AttendanceCalendar({ records, onDeleted }: AttendanceCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDelete = async (e: React.MouseEvent, id: string, subjectName: string, date: string) => {
+    e.stopPropagation();
+    if (!confirm(`Delete attendance for ${subjectName} on ${formatDisplayDate(date)}?`)) return;
+    setDeletingId(id);
+    try {
+      await deleteAttendance(id);
+      onDeleted?.();
+    } catch {
+      alert("Failed to delete record");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -115,12 +132,21 @@ export function AttendanceCalendar({ records }: AttendanceCalendarProps) {
                   <div
                     key={r.id}
                     className={cn(
-                      "rounded px-1 py-0.5 text-[10px] leading-tight text-white truncate",
+                      "group relative rounded px-1 py-0.5 text-[10px] leading-tight text-white truncate",
                       STATUS_COLORS[r.status].calendar
                     )}
                     title={`${r.subject?.name} - ${r.status}${r.lectureCount > 1 ? ` (${r.lectureCount} lectures)` : ""}`}
                   >
-                    <div className="truncate font-medium flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={(e) => handleDelete(e, r.id, r.subject?.name || "Subject", r.date)}
+                      disabled={deletingId === r.id}
+                      className="absolute right-0.5 top-0.5 hidden rounded bg-black/40 p-0.5 text-white hover:bg-black/80 group-hover:block"
+                      title="Delete entry"
+                    >
+                      <X className="h-2.5 w-2.5" />
+                    </button>
+                    <div className="truncate font-medium flex items-center justify-between pr-3">
                       <span className="truncate">{getShortSubjectName(r.subject?.name || "")}</span>
                       {r.lectureCount > 1 && (
                         <span className="ml-1 rounded bg-black/20 px-1 text-[9px] font-bold">
